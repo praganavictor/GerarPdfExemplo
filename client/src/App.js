@@ -6,10 +6,10 @@ import "./App.css";
 
 class App extends Component {
   state = {
-    name: "Adrian",
+    name: "",
     receiptId: 0,
     price1: 0,
-    price2: 0
+    itens: []
   };
 
   createAndDownloadPdf = () => {
@@ -21,6 +21,16 @@ class App extends Component {
 
         saveAs(pdfBlob, "newPdf.pdf");
       });
+  };
+
+  addHandler = () => {
+    const { name, receiptId, price1 } = this.state;
+    const item = {
+      name,
+      receiptId,
+      price1
+    };
+    this.setState({ itens: [...this.state.itens, item] });
   };
 
   handleChange = ({ target: { value, name } }) =>
@@ -47,13 +57,17 @@ class App extends Component {
           name="price1"
           onChange={this.handleChange}
         />
-        <input
-          type="number"
-          placeholder="Price 2"
-          name="price2"
-          onChange={this.handleChange}
-        />
+        <button onClick={this.addHandler}>Adicionar</button>
         <button onClick={this.createAndDownloadPdf}>Download PDF</button>
+        <div>
+          {this.state.itens.map(item => (
+            <div key={item.receiptId}>
+              <h1>name: {item.name}</h1>
+              <p>Receipt ID: {item.receiptId}</p>
+              <p>price1 ID: {item.price1}</p>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

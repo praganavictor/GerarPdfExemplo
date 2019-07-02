@@ -1,5 +1,13 @@
-module.exports = ({ name, price1, price2, receiptId }) => {
+module.exports = ({ name, price1, itens, receiptId }) => {
   const today = new Date();
+  const lista = itens.map(item => {
+    return `
+    <tr class="item">
+       <td>${item.name}</td>
+       <td>${item.receiptId}</td>
+       <td>${item.price1}</td>
+    </tr>`;
+  });
   return `
     <!doctype html>
     <html>
@@ -96,36 +104,13 @@ module.exports = ({ name, price1, price2, receiptId }) => {
                       </table>
                    </td>
                 </tr>
-                <tr class="information">
-                   <td colspan="2">
-                      <table>
-                         <tr>
-                            <td>
-                               Customer name: ${name}
-                            </td>
-                            <td>
-                               Receipt number: ${receiptId}
-                            </td>
-                         </tr>
-                      </table>
-                   </td>
-                </tr>
                 <tr class="heading">
-                   <td>Bought items:</td>
+                   <td>receiptId</td>
+                   <td>name</td>
                    <td>Price</td>
                 </tr>
-                <tr class="item">
-                   <td>First item:</td>
-                   <td>${price1}$</td>
-                </tr>
-                <tr class="item">
-                   <td>Second item:</td>
-                   <td>${price2}$</td>
-                </tr>
+                ${lista}
              </table>
-             <br />
-             <h1 class="justify-center">Total price: ${parseInt(price1) +
-               parseInt(price2)}$</h1>
           </div>
        </body>
     </html>
