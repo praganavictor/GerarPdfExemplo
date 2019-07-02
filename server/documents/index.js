@@ -1,118 +1,63 @@
-module.exports = ({ name, price1, itens, receiptId }) => {
-  const today = new Date();
-  const lista = itens.map(item => {
-    return `
-    <tr class="item">
-       <td>${item.name}</td>
-       <td>${item.receiptId}</td>
-       <td>${item.price1}</td>
-    </tr>`;
+const pdf = require("pdfjs");
+const fs = require("fs");
+
+module.exports = async ({ itens }) => {
+  var doc = new pdf.Document({});
+
+  var lorem =
+    "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+
+  doc.footer().pageNumber(
+    function(curr, total) {
+      return curr + " / " + total;
+    },
+    { textAlign: "center" }
+  );
+
+  var cell = doc.cell({ paddingBottom: 0.5 * pdf.cm });
+  cell.text("Lista de participantes:", { fontSize: 16 });
+
+  var table = doc.table({
+    widths: [1.5 * pdf.cm, 1.5 * pdf.cm, null, 2 * pdf.cm, 2.5 * pdf.cm],
+    borderHorizontalWidths: function(i) {
+      return i < 2 ? 1 : 0.1;
+    },
+    padding: 5
   });
-  return `
-    <!doctype html>
-    <html>
-       <head>
-          <meta charset="utf-8">
-          <title>PDF Result Template</title>
-          <style>
-             .invoice-box {
-             max-width: 800px;
-             margin: auto;
-             padding: 30px;
-             border: 1px solid #eee;
-             box-shadow: 0 0 10px rgba(0, 0, 0, .15);
-             font-size: 16px;
-             line-height: 24px;
-             font-family: 'Helvetica Neue', 'Helvetica',
-             color: #555;
-             }
-             .margin-top {
-             margin-top: 50px;
-             }
-             .justify-center {
-             text-align: center;
-             }
-             .invoice-box table {
-             width: 100%;
-             line-height: inherit;
-             text-align: left;
-             }
-             .invoice-box table td {
-             padding: 5px;
-             vertical-align: top;
-             }
-             .invoice-box table tr td:nth-child(2) {
-             text-align: right;
-             }
-             .invoice-box table tr.top table td {
-             padding-bottom: 20px;
-             }
-             .invoice-box table tr.top table td.title {
-             font-size: 45px;
-             line-height: 45px;
-             color: #333;
-             }
-             .invoice-box table tr.information table td {
-             padding-bottom: 40px;
-             }
-             .invoice-box table tr.heading td {
-             background: #eee;
-             border-bottom: 1px solid #ddd;
-             font-weight: bold;
-             }
-             .invoice-box table tr.details td {
-             padding-bottom: 20px;
-             }
-             .invoice-box table tr.item td {
-             border-bottom: 1px solid #eee;
-             }
-             .invoice-box table tr.item.last td {
-             border-bottom: none;
-             }
-             .invoice-box table tr.total td:nth-child(2) {
-             border-top: 2px solid #eee;
-             font-weight: bold;
-             }
-             @media only screen and (max-width: 600px) {
-             .invoice-box table tr.top table td {
-             width: 100%;
-             display: block;
-             text-align: center;
-             }
-             .invoice-box table tr.information table td {
-             width: 100%;
-             display: block;
-             text-align: center;
-             }
-             }
-          </style>
-       </head>
-       <body>
-          <div class="invoice-box">
-             <table cellpadding="0" cellspacing="0">
-                <tr class="top">
-                   <td colspan="2">
-                      <table>
-                         <tr>
-                            <td class="title"><img  src="https://i2.wp.com/cleverlogos.co/wp-content/uploads/2018/05/reciepthound_1.jpg?fit=800%2C600&ssl=1"
-                               style="width:100%; max-width:156px;"></td>
-                            <td>
-                               Datum: ${`${today.getDate()}. ${today.getMonth() +
-                                 1}. ${today.getFullYear()}.`}
-                            </td>
-                         </tr>
-                      </table>
-                   </td>
-                </tr>
-                <tr class="heading">
-                   <td>receiptId</td>
-                   <td>name</td>
-                   <td>Price</td>
-                </tr>
-                ${lista}
-             </table>
-          </div>
-       </body>
-    </html>
-    `;
+
+  var tr = table.header({ borderBottomWidth: 1.5 });
+  tr.cell("#");
+  tr.cell("Unit");
+  tr.cell("Subject");
+  tr.cell("Price", { textAlign: "right" });
+
+  function addRow(qty, name, desc, price) {
+    var tr = table.row();
+    tr.cell(qty.toString());
+    tr.cell("pc.");
+
+    var article = tr.cell().text();
+    article
+      .add(name, {})
+      .br()
+      .add(desc, { fontSize: 11, textAlign: "justify" });
+
+    tr.cell(price, { textAlign: "right" });
+  }
+
+  for (item of itens) {
+    addRow(item.receiptId, item.name, lorem, item.price1);
+  }
+  addRow(2, "Article A", lorem, "500");
+  addRow(1, "Article B", lorem, "250");
+  addRow(2, "Article C", lorem, "330");
+  addRow(3, "Article D", lorem, "1220");
+  addRow(2, "Article E", lorem, "120");
+  addRow(5, "Article F", lorem, "50");
+  addRow(5, "Article F", lorem, "50");
+  addRow(5, "Article F", lorem, "50");
+  addRow(5, "Article F", lorem, "50");
+
+  doc.pipe(fs.createWriteStream("output.pdf"));
+  await doc.end();
 };

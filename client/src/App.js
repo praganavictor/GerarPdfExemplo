@@ -19,7 +19,7 @@ class App extends Component {
       .then(res => {
         const pdfBlob = new Blob([res.data], { type: "application/pdf" });
 
-        saveAs(pdfBlob, "newPdf.pdf");
+        saveAs(pdfBlob, "participantes.pdf");
       });
   };
 

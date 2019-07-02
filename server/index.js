@@ -11,17 +11,12 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-app.post("/create-pdf", (req, res) => {
-  pdf.create(pdfTemplate(req.body), {}).toFile("result.pdf", err => {
-    if (err) {
-      res.send(Promise.reject());
-    }
-    res.send(Promise.resolve());
-  });
+app.post("/create-pdf", async (req, res) => {
+  await pdfTemplate(req.body).then(res.send(true));
 });
 
 app.get("/fetch-pdf", (req, res) => {
-  res.sendFile(`${__dirname}/result.pdf`);
+  res.sendFile(`${__dirname}/output.pdf`);
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
